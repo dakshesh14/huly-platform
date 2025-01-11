@@ -157,6 +157,11 @@ export interface Config {
   TELEGRAM_BOT_URL?: string
   AI_URL?:string
   DISABLE_SIGNUP?: string
+  PASSWORD_MIN_LENGTH?: string | number
+  PASSWORD_MIN_SPECIAL_CHARS?: string | number
+  PASSWORD_MIN_DIGITS?: string | number
+  PASSWORD_MIN_UPPER_CHARS?: string | number
+  PASSWORD_MIN_LOWER_CHARS?: string | number
   // Could be defined for dev environment
   FRONT_URL?: string
   PREVIEW_CONFIG?: string
@@ -249,6 +254,13 @@ function configureI18n(): void {
    addStringsLoader(surveyId, async (lang: string) => await import(`@hcengineering/survey-assets/lang/${lang}.json`))
 }
 
+function parseNumberOrZero(value?:string|number) :number {
+  if (typeof value === 'number' ) return value ?? 0;
+  
+  const parsed = parseInt(value ?? '0')
+  return isNaN(parsed) ? 0 : parsed
+}
+
 export async function configurePlatform() {
   setMetadata(platform.metadata.LoadHelper, async (loader) => {
     for (let i = 0; i < 5; i++) {
@@ -304,6 +316,14 @@ export async function configurePlatform() {
 
   setMetadata(login.metadata.AccountsUrl, config.ACCOUNTS_URL)
   setMetadata(login.metadata.DisableSignUp, config.DISABLE_SIGNUP === 'true')
+
+  setMetadata(login.metadata.PasswordValidations, {
+    MinDigits: parseNumberOrZero(config.PASSWORD_MIN_DIGITS),
+    MinLength: parseNumberOrZero(config.PASSWORD_MIN_LENGTH),
+    MinLowerChars: parseNumberOrZero(config.PASSWORD_MIN_LOWER_CHARS),
+    MinSpecialChars: parseNumberOrZero(config.PASSWORD_MIN_SPECIAL_CHARS),
+    MinUpperChars: parseNumberOrZero(config.PASSWORD_MIN_UPPER_CHARS)
+  })
   
   setMetadata(presentation.metadata.FilesURL, config.FILES_URL)
   setMetadata(presentation.metadata.UploadURL, config.UPLOAD_URL)
